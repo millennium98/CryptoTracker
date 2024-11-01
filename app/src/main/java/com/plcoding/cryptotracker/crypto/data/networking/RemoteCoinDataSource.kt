@@ -1,10 +1,10 @@
 package com.plcoding.cryptotracker.crypto.data.networking
 
-import com.plcoding.core.data.networking.constructUrl
-import com.plcoding.core.data.networking.safeCall
-import com.plcoding.core.domain.util.NetworkError
-import com.plcoding.core.domain.util.Result
-import com.plcoding.core.domain.util.map
+import com.plcoding.cryptotracker.core.data.networking.constructUrl
+import com.plcoding.cryptotracker.core.data.networking.safeCall
+import com.plcoding.cryptotracker.core.domain.util.NetworkError
+import com.plcoding.cryptotracker.core.domain.util.Result
+import com.plcoding.cryptotracker.core.domain.util.map
 import com.plcoding.cryptotracker.crypto.data.mappers.toCoin
 import com.plcoding.cryptotracker.crypto.data.mappers.toCoinPrice
 import com.plcoding.cryptotracker.crypto.data.networking.dto.CoinHistoryDto

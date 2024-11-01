@@ -1,4 +1,4 @@
-package com.plcoding.core.presentation.util
+package com.plcoding.cryptotracker.core.presentation.util
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
