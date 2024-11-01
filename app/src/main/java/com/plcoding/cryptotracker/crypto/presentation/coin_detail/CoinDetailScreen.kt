@@ -2,6 +2,7 @@
 
 package com.plcoding.cryptotracker.crypto.presentation.coin_detail
 
+import androidx.compose.animation.AnimatedVisibility
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,10 +28,16 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -64,7 +72,7 @@ fun CoinDetailScreen(
         fontSize = 18.sp,
         color = contentColor
     )
-    
+
     Column {
         if (isPortrait) {
             Row(
@@ -169,6 +177,48 @@ fun CoinDetailScreen(
                     style = defaultTextStyle,
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
+                )
+            }
+            AnimatedVisibility(
+                visible = coin.coinPriceHistory.isNotEmpty()
+            ) {
+                var selectedDataPoint by remember {
+                    mutableStateOf<DataPoint?>(null)
+                }
+                var labelWidth by remember {
+                    mutableFloatStateOf(0f)
+                }
+                var totalChartWidth by remember {
+                    mutableFloatStateOf(0f)
+                }
+                val amountOfVisibleDataPoint = if (labelWidth > 0) {
+                    ((totalChartWidth - 2.5 * labelWidth) / labelWidth).toInt()
+                } else 0
+                val startIndex = (coin.coinPriceHistory.lastIndex - amountOfVisibleDataPoint)
+                    .coerceAtLeast(0)
+                LineChart(
+                    dataPoints = coin.coinPriceHistory,
+                    style = ChartStyle(
+                        chartLineColor = MaterialTheme.colorScheme.primary,
+                        unselectedColor = MaterialTheme.colorScheme.secondary,
+                        selectedColor = MaterialTheme.colorScheme.primary,
+                        helperLinesThicknessPx = 5f,
+                        axisLinesThicknessPx = 5f,
+                        labelFontSize = 14.sp,
+                        minYLabelSpacing = 25.dp,
+                        verticalPadding = 8.dp,
+                        xAxisLabelSpacing = 8.dp,
+                        horizontalPadding = 8.dp
+                    ),
+                    visibleDataPointsIndices = startIndex..coin.coinPriceHistory.lastIndex,
+                    unit = "$",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16 / 9f)
+                        .onSizeChanged { totalChartWidth = it.width.toFloat() },
+                    selectedDataPoint = selectedDataPoint,
+                    onSelectedDataPoint = { selectedDataPoint = it },
+                    onXLabelWidthChange = { labelWidth = it }
                 )
             }
         }
