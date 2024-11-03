@@ -2,6 +2,7 @@
 
 package com.plcoding.cryptotracker.crypto.presentation.coin_detail
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -9,14 +10,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -33,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.plcoding.cryptotracker.R
 import com.plcoding.cryptotracker.crypto.presentation.coin_detail.components.InfoCard
+import com.plcoding.cryptotracker.crypto.presentation.coin_list.CoinListAction
 import com.plcoding.cryptotracker.crypto.presentation.coin_list.CoinListState
 import com.plcoding.cryptotracker.crypto.presentation.coin_list.components.previewCoin
 import com.plcoding.cryptotracker.crypto.presentation.model.toCoinUI
@@ -43,76 +51,124 @@ import com.plcoding.cryptotracker.ui.theme.greenBackground
 @Composable
 fun CoinDetailScreen(
     state: CoinListState,
+    onAction: (CoinListAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val contentColor = if (isSystemInDarkTheme()) Color.White else Color.Black
-    if (state.isLoading) {
-        Box(
-            modifier = modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
-    } else if (state.selectedCoin != null) {
-        val coin = state.selectedCoin
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(id = coin.iconRes),
-                contentDescription = coin.name,
-                modifier = Modifier.size(100.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = coin.name,
-                fontSize = 40.sp,
-                fontWeight = FontWeight.Black,
-                textAlign = TextAlign.Center,
-                color = contentColor
-            )
-            Text(
-                text = coin.symbol,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Black,
-                textAlign = TextAlign.Center,
-                color = contentColor
-            )
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
+
+    val isPortrait =
+        LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
+
+    val defaultTextStyle = LocalTextStyle.current.copy(
+        textAlign = TextAlign.Center,
+        fontSize = 18.sp,
+        color = contentColor
+    )
+    
+    Column {
+        if (isPortrait) {
+            Row(
+                modifier = modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                InfoCard(
-                    title = stringResource(id = R.string.market_cap),
-                    formattedText = "$ ${coin.marketCapUsd.formatted}",
-                    icon = ImageVector.vectorResource(id = R.drawable.stock)
-                )
-                InfoCard(
-                    title = stringResource(id = R.string.price),
-                    formattedText = "$ ${coin.priceUsd.formatted}",
-                    icon = ImageVector.vectorResource(id = R.drawable.dollar)
-                )
-                val absoluteChangeFormatted =
-                    (coin.priceUsd.value * (coin.changePercent24Hr.value / 100))
-                        .toDisplayableNumber()
-                val isPositive = coin.changePercent24Hr.value > 0.0
-                val contentColor = if (isPositive) {
-                    if (isSystemInDarkTheme()) Color.Green else greenBackground
-                } else {
-                    MaterialTheme.colorScheme.error
+                IconButton(
+                    onClick = {
+                        onAction.invoke(CoinListAction.OnDetailBackPress)
+                    },
+                    modifier = Modifier
+                        .padding(16.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null,
+                        tint = contentColor,
+                        modifier = Modifier
+                            .size(24.dp)
+                    )
                 }
-                InfoCard(
-                    title = stringResource(id = R.string.change_last_24_hours),
-                    formattedText = absoluteChangeFormatted.formatted,
-                    icon = ImageVector.vectorResource(
-                        id = if (isPositive) R.drawable.trending else R.drawable.trending_down
-                    ),
-                    contentColor = contentColor
+            }
+        }
+        if (state.isLoading) {
+            Box(
+                modifier = modifier
+                    .fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (state.selectedCoin != null) {
+            val coin = state.selectedCoin
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = coin.iconRes),
+                    contentDescription = coin.name,
+                    modifier = Modifier.size(100.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = coin.name,
+                    fontSize = 40.sp,
+                    fontWeight = FontWeight.Black,
+                    textAlign = TextAlign.Center,
+                    color = contentColor
+                )
+                Text(
+                    text = coin.symbol,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Black,
+                    textAlign = TextAlign.Center,
+                    color = contentColor
+                )
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    InfoCard(
+                        title = stringResource(id = R.string.market_cap),
+                        formattedText = "$ ${coin.marketCapUsd.formatted}",
+                        icon = ImageVector.vectorResource(id = R.drawable.stock)
+                    )
+                    InfoCard(
+                        title = stringResource(id = R.string.price),
+                        formattedText = "$ ${coin.priceUsd.formatted}",
+                        icon = ImageVector.vectorResource(id = R.drawable.dollar)
+                    )
+                    val absoluteChangeFormatted =
+                        (coin.priceUsd.value * (coin.changePercent24Hr.value / 100))
+                            .toDisplayableNumber()
+                    val isPositive = coin.changePercent24Hr.value > 0.0
+                    val cardContentColor = if (isPositive) {
+                        if (isSystemInDarkTheme()) Color.Green else greenBackground
+                    } else {
+                        MaterialTheme.colorScheme.error
+                    }
+                    InfoCard(
+                        title = stringResource(id = R.string.change_last_24_hours),
+                        formattedText = absoluteChangeFormatted.formatted,
+                        icon = ImageVector.vectorResource(
+                            id = if (isPositive) R.drawable.trending else R.drawable.trending_down
+                        ),
+                        contentColor = cardContentColor
+                    )
+                }
+            }
+        } else {
+            Box(
+                modifier = modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(id = R.string.no_data),
+                    style = defaultTextStyle,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
                 )
             }
         }
@@ -127,6 +183,7 @@ private fun CoinDetailScreenPreview() {
             state = CoinListState(
                 selectedCoin = previewCoin.toCoinUI()
             ),
+            onAction = {},
             modifier = Modifier.background(
                 MaterialTheme.colorScheme.background
             )

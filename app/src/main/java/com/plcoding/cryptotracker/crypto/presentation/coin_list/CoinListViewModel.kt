@@ -38,6 +38,15 @@ class CoinListViewModel(
             is CoinListAction.OnCoinClick -> {
                 selectCoin(coinUI = action.coinUI)
             }
+            is CoinListAction.OnDetailBackPress -> {
+                deselectCoin()
+            }
+        }
+    }
+
+    private fun deselectCoin() {
+        _state.update {
+            it.copy(selectedCoin = null)
         }
     }
 

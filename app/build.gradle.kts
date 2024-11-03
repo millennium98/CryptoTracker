@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.devtools.ksp)
 }
 
 
@@ -59,19 +60,34 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
     debugImplementation(libs.bundles.compose.debug)
-
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
+    //ConstraintLayout
+    implementation(libs.androidx.constraintlayout.compose)
+    //Koin
     implementation(libs.bundles.koin)
-
+    //Ktor
     implementation(libs.bundles.ktor)
-
+    //Splash
+    implementation (libs.androidx.core.splashscreen)
+    //Navigation
+    implementation(libs.androidx.navigation.compose)
+    //Coil
+    implementation(libs.coil.compose)
+    //Datastore
+    implementation(libs.androidx.datastore.preferences)
+    //Paging 3
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.compose)
+    //Room
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    //Test
     testImplementation(libs.junit)
-
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
