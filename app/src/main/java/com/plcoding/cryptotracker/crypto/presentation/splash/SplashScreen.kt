@@ -9,6 +9,8 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -22,9 +24,12 @@ import androidx.constraintlayout.compose.ChainStyle
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.plcoding.cryptotracker.R
 import com.plcoding.cryptotracker.ui.theme.CryptoTrackerTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun SplashScreen(
+    onFinish: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val contentColor = if (isSystemInDarkTheme()) Color.White else Color.Black
@@ -33,6 +38,15 @@ fun SplashScreen(
         fontSize = 24.sp,
         color = contentColor
     )
+
+    val coroutineScope = rememberCoroutineScope()
+    LaunchedEffect(key1 = Unit) {
+        coroutineScope.launch {
+            delay(3000)
+            onFinish.invoke()
+        }
+    }
+
     ConstraintLayout (
         modifier = modifier
             .fillMaxSize()
