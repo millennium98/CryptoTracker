@@ -15,6 +15,7 @@ composeBom = "2024.09.02"
 desugar-jdk-libs = "2.1.2"
 ktor = "2.3.12"
 koin = "3.5.6"
+koin-compose-vm = "4.0.0"
 material3-adaptive = "1.0.0"
 compose-material-icons-extended = "1.7.2"
 navigationCompose = "2.8.3"
@@ -51,6 +52,9 @@ desugar-jdk-libs = { module = "com.android.tools:desugar_jdk_libs", version.ref 
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
+koin-androidx-compose-navigation = { group = "io.insert-koin", name = "koin-androidx-compose-navigation", version.ref = "koin" }
+koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel", version.ref = "koin-compose-vm" }
+koin-compose-viewmodel-navigation= { group = "io.insert-koin", name = "koin-compose-viewmodel-navigation", version.ref = "koin-compose-vm" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
@@ -88,7 +92,10 @@ compose-debug = [
 koin = [
     "koin-core",
     "koin-android",
-    "koin-androidx-compose"
+    "koin-androidx-compose",
+    "koin-compose-viewmodel",
+    "koin-androidx-compose-navigation",
+    "koin-compose-viewmodel-navigation"
 ]
 ktor = [
     "ktor-client-cio",

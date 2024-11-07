@@ -6,8 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
@@ -15,14 +13,17 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.plcoding.cryptotracker.core.navigation.AdaptiveCoinListDetailPane
-import com.plcoding.cryptotracker.core.navigation.CoinListDetailRoute
+import com.plcoding.cryptotracker.core.navigation.HomeRoute
+import com.plcoding.cryptotracker.core.navigation.NestedRoute
 import com.plcoding.cryptotracker.core.navigation.SplashRoute
 import com.plcoding.cryptotracker.core.navigation.util.appComposable
 import com.plcoding.cryptotracker.core.navigation.util.popAndNavigate
+import com.plcoding.cryptotracker.crypto.presentation.home.HomeScreen
 import com.plcoding.cryptotracker.crypto.presentation.splash.SplashScreen
 import com.plcoding.cryptotracker.ui.theme.CryptoTrackerTheme
+import org.koin.compose.KoinContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,29 +31,33 @@ class MainActivity : ComponentActivity() {
 
         installSplashScreen()
         enableEdgeToEdge()
-        hideSystemBars()
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        hideSystemBars()
 
         setContent {
-            CryptoTrackerTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            KoinContext {
+                CryptoTrackerTheme {
                     val navController = rememberNavController()
                     Box(
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.fillMaxSize()
                     ) {
                         NavHost(
                             navController = navController,
-                            startDestination = SplashRoute
+                            startDestination = NestedRoute
                         ) {
-                            appComposable<SplashRoute> {
-                                SplashScreen(
-                                    onFinish = {
-                                        navController.popAndNavigate(CoinListDetailRoute)
-                                    }
-                                )
-                            }
-                            appComposable<CoinListDetailRoute> {
-                                AdaptiveCoinListDetailPane()
+                            navigation<NestedRoute>(
+                                startDestination = SplashRoute
+                            ) {
+                                appComposable<SplashRoute> {
+                                    SplashScreen(
+                                        onFinish = {
+                                            navController.popAndNavigate(HomeRoute)
+                                        }
+                                    )
+                                }
+                                appComposable<HomeRoute> {
+                                    HomeScreen()
+                                }
                             }
                         }
                     }

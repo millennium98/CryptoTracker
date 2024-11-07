@@ -8,6 +8,7 @@ import com.plcoding.cryptotracker.crypto.domain.CoinDataSource
 import com.plcoding.cryptotracker.crypto.presentation.coin_detail.DataPoint
 import com.plcoding.cryptotracker.crypto.presentation.model.CoinUI
 import com.plcoding.cryptotracker.crypto.presentation.model.toCoinUI
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
@@ -47,43 +49,53 @@ class CoinListViewModel(
     }
 
     private fun deselectCoin() {
-        _state.update {
-            it.copy(selectedCoin = null)
+        viewModelScope.launch {
+            _state.update {
+                it.copy(selectedCoin = null)
+            }
         }
     }
 
     private fun selectCoin(coinUI: CoinUI) {
-        _state.update {
-            it.copy(selectedCoin = coinUI)
-        }
         viewModelScope.launch {
-            coinDataSource.getCoinHistory(
-                coinId = coinUI.id,
-                start = ZonedDateTime.now().minusDays(5),
-                end = ZonedDateTime.now()
-            )
-            .onSuccess { history ->
-                val dataPoints = history
-                    .sortedBy { it.time }
-                    .map {
-                        DataPoint(
-                            x = it.time.hour.toFloat(),
-                            y = it.priceUsd.toFloat(),
-                            xLabel = DateTimeFormatter
-                                .ofPattern("ha\nM/d")
-                                .format(it.time)
-                        )
-                    }
-                _state.update {
-                    it.copy(
-                        selectedCoin = it.selectedCoin?.copy(
-                            coinPriceHistory = dataPoints
-                        )
-                    )
-                }
+            _state.update {
+                it.copy(selectedCoin = coinUI)
             }
-            .onError { error ->
-                _events.send(CoinListEvent.Error(error))
+            withContext(Dispatchers.IO) {
+                coinDataSource.getCoinHistory(
+                    coinId = coinUI.id,
+                    start = ZonedDateTime.now().minusDays(5),
+                    end = ZonedDateTime.now()
+                )
+                    .onSuccess { history ->
+                        val dataPoints = withContext(Dispatchers.Default) {
+                            history
+                                .sortedBy { it.time }
+                                .map {
+                                    DataPoint(
+                                        x = it.time.hour.toFloat(),
+                                        y = it.priceUsd.toFloat(),
+                                        xLabel = DateTimeFormatter
+                                            .ofPattern("ha\nM/d")
+                                            .format(it.time)
+                                    )
+                                }
+                        }
+                        withContext(Dispatchers.Main) {
+                            _state.update {
+                                it.copy(
+                                    selectedCoin = it.selectedCoin?.copy(
+                                        coinPriceHistory = dataPoints
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    .onError { error ->
+                        withContext(Dispatchers.Main) {
+                            _events.send(CoinListEvent.Error(error))
+                        }
+                    }
             }
         }
     }
@@ -93,22 +105,28 @@ class CoinListViewModel(
             _state.update {
                 it.copy(isLoading = true)
             }
-            coinDataSource
-                .getCoins()
-                .onSuccess { coins ->
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            coins = coins.map { coin -> coin.toCoinUI() }
-                        )
+            withContext(Dispatchers.IO) {
+                coinDataSource
+                    .getCoins()
+                    .onSuccess { coins ->
+                        withContext(Dispatchers.Main) {
+                            _state.update {
+                                it.copy(
+                                    isLoading = false,
+                                    coins = coins.map { coin -> coin.toCoinUI() }
+                                )
+                            }
+                        }
                     }
-                }
-                .onError { error ->
-                    _state.update {
-                        it.copy(isLoading = false)
+                    .onError { error ->
+                        withContext(Dispatchers.Main) {
+                            _state.update {
+                                it.copy(isLoading = false)
+                            }
+                            _events.send(CoinListEvent.Error(error))
+                        }
                     }
-                    _events.send(CoinListEvent.Error(error))
-                }
+            }
         }
     }
 }

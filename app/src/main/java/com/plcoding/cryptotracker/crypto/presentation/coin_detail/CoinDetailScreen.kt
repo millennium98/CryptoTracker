@@ -84,8 +84,7 @@ fun CoinDetailScreen(
                     onClick = {
                         onAction.invoke(CoinListAction.OnDetailBackPress)
                     },
-                    modifier = Modifier
-                        .padding(16.dp)
+                    modifier = Modifier.padding(8.dp)
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -166,7 +165,6 @@ fun CoinDetailScreen(
                         contentColor = cardContentColor
                     )
                 }
-
                 AnimatedVisibility(
                     visible = coin.coinPriceHistory.isNotEmpty()
                 ) {

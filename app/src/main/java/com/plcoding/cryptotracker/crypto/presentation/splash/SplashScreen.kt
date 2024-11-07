@@ -4,9 +4,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,45 +49,50 @@ fun SplashScreen(
         }
     }
 
-    ConstraintLayout (
-        modifier = modifier
-            .fillMaxSize()
-            .background(
-                color = MaterialTheme.colorScheme.background
+    Scaffold(
+        modifier = modifier.fillMaxSize()
+    ) { innerPadding ->
+        ConstraintLayout(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(
+                    color = MaterialTheme.colorScheme.background
+                )
+        ) {
+            val (icon, title, progress) = createRefs()
+
+            createVerticalChain(icon, title, chainStyle = ChainStyle.Packed)
+
+            Image(
+                bitmap = ImageBitmap.imageResource(id = R.drawable.ic_crypto),
+                contentDescription = null,
+                modifier = Modifier.constrainAs(icon) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(title.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+
+                }
             )
-    ) {
-        val (icon, title, progress) = createRefs()
-
-        createVerticalChain(icon, title, chainStyle = ChainStyle.Packed)
-
-        Image(
-            bitmap = ImageBitmap.imageResource(id = R.drawable.ic_crypto),
-            contentDescription = null,
-            modifier = Modifier.constrainAs(icon) {
-                top.linkTo(parent.top)
-                bottom.linkTo(title.top)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-
-            }
-        )
-        Text(
-            text = stringResource(id = R.string.app_name),
-            style = defaultTextStyle,
-            modifier = Modifier.constrainAs(title) {
-                bottom.linkTo(parent.bottom)
-                top.linkTo(icon.bottom)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-            }
-        )
-        CircularProgressIndicator(
-            modifier = Modifier.constrainAs(progress) {
-                bottom.linkTo(parent.bottom, margin = 32.dp)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-            }
-        )
+            Text(
+                text = stringResource(id = R.string.app_name),
+                style = defaultTextStyle,
+                modifier = Modifier.constrainAs(title) {
+                    bottom.linkTo(parent.bottom)
+                    top.linkTo(icon.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
+            )
+            CircularProgressIndicator(
+                modifier = Modifier.constrainAs(progress) {
+                    bottom.linkTo(parent.bottom, margin = 32.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
+            )
+        }
     }
 }
 
